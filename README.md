@@ -1,36 +1,34 @@
 # Distributed Threshold Signing Network (DTS)
 
 ## Overview
-DTS is a decentralized threshold signing network implemented on the Stacks blockchain using Clarity smart contracts. The system enables secure, distributed signing operations using a t-of-n threshold signature scheme with dynamic signer rotation and reputation-based governance.
-
-## Key Features
-- **BLS Threshold Signatures**: Implements t-of-n threshold signatures using BLS signature scheme
-- **Dynamic Signer Rotation**: Automatic rotation based on performance metrics and stake
-- **Reputation System**: Comprehensive scoring system based on multiple performance metrics
-- **Stake-Based Participation**: Minimum stake requirements for network participation
-- **Performance Monitoring**: Continuous monitoring of signer performance and reliability
-
-## Network Components
-1. **Primary Signers**
-   - High-stake validators responsible for signature generation
-   - Must maintain minimum stake requirements
-   - Subject to performance monitoring and rotation
-
-2. **Backup Signers**
-   - Ready to rotate into primary signer positions
-   - Must meet same stake and performance requirements
-   - Participate in network governance
-
-3. **Watchtowers**
-   - Monitor network for malicious behavior
-   - Report performance metrics
-   - Help maintain network security
+DTS is a secure and decentralized threshold signing network implemented on the Stacks blockchain using Clarity smart contracts. The system enables distributed signing operations using a t-of-n threshold signature scheme with dynamic signer rotation, robust reputation-based governance, and comprehensive security measures.
 
 ## Technical Architecture
 
-### Core Data Structures
+### Core Components
+
+1. **Signature Management**
+   - BLS threshold signature scheme (t-of-n)
+   - Partial signature submission and verification
+   - Signature aggregation mechanism
+   - Configurable threshold parameters
+
+2. **Node Types**
+   - Primary Signers: Active validators with stake
+   - Backup Signers: Ready for rotation
+   - Watchtowers: Network monitors
+
+3. **Security Features**
+   - Stake-based participation
+   - Slashing conditions
+   - Multi-signature verification
+   - Initialization protection
+   - Emergency controls
+
+### Data Structures
+
 ```clarity
-;; Signer Node Structure
+;; Signer Node
 {
     stake: uint,
     public-key: (buff 65),
@@ -40,102 +38,186 @@ DTS is a decentralized threshold signing network implemented on the Stacks block
         signing-speed: uint,
         uptime: uint,
         stake-duration: uint,
-        accuracy: uint
+        accuracy: uint,
+        total-signatures: uint,
+        valid-signatures: uint
+    },
+    slashing-history: {
+        total-slashes: uint,
+        last-slash-height: uint,
+        slashed-amount: uint
     }
+}
+
+;; Watchtower
+{
+    last-report: uint,
+    reports-submitted: uint,
+    accuracy-score: uint,
+    is-active: bool
+}
+
+;; Partial Signature
+{
+    signature: (buff 96),
+    message-hash: (buff 32),
+    timestamp: uint
 }
 ```
 
+## Features
+
+### Security Measures
+- Minimum stake requirements
+- Performance-based rotation
+- Slashing for misbehavior
+- Watchtower monitoring
+- One-time initialization
+- Length validation for cryptographic inputs
+
 ### Performance Metrics
-- **Signing Speed**: Response time for signing operations
-- **Uptime**: Node availability and reliability
-- **Stake Duration**: Length of time stake has been maintained
-- **Historical Accuracy**: Accuracy of previous signing operations
+- Signing speed
+- Node uptime
+- Stake duration
+- Signature accuracy
+- Total participation
+- Historical performance
+
+### Governance
+- Dynamic signer rotation
+- Reputation-based selection
+- Automated penalties
+- Performance thresholds
+- Stake-weighted voting
 
 ## Getting Started
 
 ### Prerequisites
-- Stacks blockchain development environment
-- Clarity CLI tools
-- Node.js and NPM (for testing and deployment)
+- Clarity CLI
+- Stacks blockchain environment
+- Node.js and NPM
 
 ### Installation
-1. Clone the repository:
 ```bash
+# Clone repository
 git clone https://github.com/yourusername/dts-network.git
 cd dts-network
-```
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Deploy the contract:
-```bash
+# Deploy contract
 clarinet contract deploy
 ```
 
 ### Contract Initialization
-To initialize the contract with default parameters:
 ```clarity
-(contract-call? .dts initialize 
+;; Initialize with default parameters
+(contract-call? .dts initialize
     u100000  ;; minimum stake
     u3       ;; required signers
     u5       ;; total signers
     u144     ;; rotation period
+    u3       ;; signature threshold
 )
 ```
 
-## Usage
+## Usage Guide
 
-### Register as a Signer
+### Register as Signer
 ```clarity
+;; Register new signer
 (contract-call? .dts register-signer <public-key>)
 ```
 
-### Update Metrics
+### Submit Signature
 ```clarity
-(contract-call? .dts update-metrics 
-    <signer>
-    <signing-speed>
-    <uptime>
-    <accuracy>
+;; Submit partial signature
+(contract-call? .dts submit-partial-signature
+    <message-hash>
+    <signature>
 )
 ```
 
-### Check Signer Status
+### Monitor Network
 ```clarity
-(contract-call? .dts get-signer-info <signer>)
+;; Register as watchtower
+(contract-call? .dts register-watchtower)
+
+;; Submit monitoring report
+(contract-call? .dts submit-watchtower-report
+    <signer>
+    <uptime>
+    <signing-speed>
+    <valid-signatures>
+)
 ```
 
-## Security Considerations
-- Minimum stake requirements protect against Sybil attacks
-- Performance metrics prevent malicious actors from maintaining positions
-- Slashing conditions for proven misbehavior
-- Regular rotation prevents centralization of power
+## Error Handling
+
+### Error Codes
+```clarity
+ERR-UNAUTHORIZED (err u100)
+ERR-INVALID-PARAMS (err u101)
+ERR-INSUFFICIENT-STAKE (err u102)
+ERR-INVALID-SIGNATURE (err u103)
+ERR-INVALID-THRESHOLD (err u104)
+ERR-WATCHTOWER-EXISTS (err u105)
+ERR-NOT-ACTIVE-SIGNER (err u106)
+ERR-ALREADY-REGISTERED (err u107)
+ERR-INVALID-METRICS (err u108)
+ERR-INVALID-SIGNATURE-LENGTH (err u109)
+ERR-INVALID-KEY-LENGTH (err u110)
+ERR-ALREADY-INITIALIZED (err u111)
+```
 
 ## Development Roadmap
 
-### Phase 1 (Current)
+### Phase 1 (Completed)
 - Basic contract structure
-- Signer registration and management
-- Performance metrics tracking
-- Initial reputation system
+- Core data structures
+- Initial security measures
 
-### Phase 2
-- BLS signature scheme implementation
-- Enhanced signer rotation logic
-- Watchtower implementation
-- Advanced reputation scoring
+### Phase 2 (Current)
+- Enhanced signature validation
+- Improved type safety
+- Robust error handling
+- Initialization protection
+- Map structure improvements
 
-### Phase 3
-- Governance mechanisms
-- Automated rotation systems
-- Enhanced security features
-- Network monitoring tools
+### Phase 3 (Planned)
+- Advanced governance features
+- Performance optimization
+- Enhanced security measures
+- Cross-chain integration
+- Event system implementation
+
+## Testing
+
+### Unit Tests
+```bash
+# Run test suite
+clarinet test
+
+# Run specific test
+clarinet test tests/dts_test.ts
+```
+
+### Security Considerations
+- Regular security audits
+- Formal verification
+- Penetration testing
+- Stress testing
+- Performance benchmarking
 
 ## Contributing
-We welcome contributions! Please see the contributing guidelines for more details.
+Please follow these steps:
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
-This project is licensed under the MIT License
+This project is licensed under the MIT License.
