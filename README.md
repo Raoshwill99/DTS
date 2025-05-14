@@ -1,223 +1,354 @@
-# Distributed Threshold Signing Network (DTS)
+# Distributed Threshold Signing Network
 
-## Overview
-DTS is a secure and decentralized threshold signing network implemented on the Stacks blockchain using Clarity smart contracts. The system enables distributed signing operations using a t-of-n threshold signature scheme with dynamic signer rotation, robust reputation-based governance, and comprehensive security measures.
+A robust, Byzantine Fault Tolerant threshold signature scheme implemented on the Stacks blockchain. This system enables distributed key management and signature generation for cryptographic operations with advanced governance, cross-chain verification, and security features.
 
-## Technical Architecture
+## 🔍 Overview
 
-### Core Components
+The Distributed Threshold Signing Network (DTSN) is a decentralized infrastructure for distributed key management and threshold signatures. It uses BLS (Boneh-Lynn-Shacham) signatures to allow a threshold of signers to collectively produce cryptographic signatures. This Phase 3 implementation adds governance, cross-chain integration, an event notification system, and enhanced security features.
 
-1. **Signature Management**
-   - BLS threshold signature scheme (t-of-n)
-   - Partial signature submission and verification
-   - Signature aggregation mechanism
-   - Configurable threshold parameters
+### What are Threshold Signatures?
 
-2. **Node Types**
-   - Primary Signers: Active validators with stake
-   - Backup Signers: Ready for rotation
-   - Watchtowers: Network monitors
+Threshold signatures allow a group of participants to collectively generate a single cryptographic signature. With an (n,t) threshold scheme, any t participants out of n total can collaborate to create a valid signature, while fewer than t cannot. This provides both security and fault tolerance.
 
-3. **Security Features**
-   - Stake-based participation
-   - Slashing conditions
-   - Multi-signature verification
-   - Initialization protection
-   - Emergency controls
+### Key Benefits
 
-### Data Structures
+- **Decentralized Key Management**: No single entity has complete control of cryptographic keys
+- **Byzantine Fault Tolerance**: System can operate correctly even if some nodes are malicious
+- **High Availability**: Continues operating even if some signers are offline
+- **Performance**: Produces compact signatures regardless of the number of signers
+- **Governance**: On-chain management of protocol parameters
+- **Cross-Chain Integration**: Verification of external blockchain transactions
 
-```clarity
-;; Signer Node
-{
-    stake: uint,
-    public-key: (buff 65),
-    reputation-score: uint,
-    last-active: uint,
-    performance-metrics: {
-        signing-speed: uint,
-        uptime: uint,
-        stake-duration: uint,
-        accuracy: uint,
-        total-signatures: uint,
-        valid-signatures: uint
-    },
-    slashing-history: {
-        total-slashes: uint,
-        last-slash-height: uint,
-        slashed-amount: uint
-    }
-}
+## 🏗️ Architecture
 
-;; Watchtower
-{
-    last-report: uint,
-    reports-submitted: uint,
-    accuracy-score: uint,
-    is-active: bool
-}
+The DTSN consists of the following components:
 
-;; Partial Signature
-{
-    signature: (buff 96),
-    message-hash: (buff 32),
-    timestamp: uint
-}
-```
+1. **Signer Network**: Nodes that stake tokens and participate in signature generation
+2. **Watchtower System**: Monitoring nodes that report on performance metrics
+3. **Governance Layer**: Proposal and voting system for protocol management
+4. **Cross-Chain Verification**: Oracle-based system for external chain verification
+5. **Events System**: Subscription and notification infrastructure
+6. **Economic Model**: Staking, rewards, and protocol fees
 
-## Features
+## ✨ Features
 
-### Security Measures
-- Minimum stake requirements
-- Performance-based rotation
-- Slashing for misbehavior
-- Watchtower monitoring
-- One-time initialization
-- Length validation for cryptographic inputs
+### Core Features
+- BLS threshold signature generation and verification
+- Stake-based signer registration and management
+- Performance-based signer rotation
+- Watchtower monitoring system
 
-### Performance Metrics
-- Signing speed
-- Node uptime
-- Stake duration
-- Signature accuracy
-- Total participation
-- Historical performance
+### Governance Features
+- On-chain proposal creation and voting
+- Parameter modification through governance
+- Stake and reputation-weighted voting
+- Timelocked execution of passed proposals
+
+### Security Features
+- Emergency pause mechanism
+- Reputation system for signers
+- Performance metrics tracking
+- Slashing for malicious behavior
+
+### Cross-Chain Features
+- External blockchain registration
+- Oracle-based transaction verification
+- Proof verification with threshold consensus
+
+### Economic Features
+- Protocol fee collection
+- Performance-based rewards
+- Stake requirements for signers
+- Reward pool management
+
+### Event System
+- Event subscription mechanism
+- Ten different event types
+- Notification infrastructure
+
+## 💻 Technical Implementation
+
+The DTSN is implemented as a Clarity smart contract on the Stacks blockchain. It uses a combination of maps, data variables, and functions to manage the state and logic of the protocol.
+
+### Key Data Structures
+
+- **Signer Management**:
+  - `signer-nodes`: Tracks registered signers and their details
+  - `active-signers`: Identifies current active signers
+  - `metrics-history`: Historical performance data by epoch
+
+- **Signature Management**:
+  - `partial-signatures`: Stores BLS partial signatures
+  - `current-message-hash`: Current message being validated
+
+- **Governance**:
+  - `governance-proposals`: Stores proposal details
+  - `governance-votes`: Records votes on proposals
+
+- **Cross-Chain**:
+  - `verified-chains`: Information about registered external chains
+  - `cross-chain-transactions`: Verified external transactions
+
+- **Events**:
+  - `event-subscribers`: Tracks subscription details
+
+### System Parameters
+
+The protocol includes several configurable parameters:
+- `min-stake`: Minimum tokens required to become a signer
+- `required-signers`: Minimum number of active signers
+- `total-signers`: Maximum number of active signers
+- `rotation-period`: Blocks between signer rotations
+- `signature-threshold`: Minimum signatures required for verification
+- `governance-threshold`: Approval percentage required for proposals
+- `protocol-fee-percentage`: Fee collected on operations
+
+## 🔧 Functions
+
+### Initialization
+- `initialize`: Set up initial protocol parameters
+
+### Signer Management
+- `register-signer`: Join the network as a signer
+- `remove-active-signer`: Leave active signer set
+- `slash-signer`: Penalize misbehaving signers
+
+### Signature Operations
+- `submit-partial-signature`: Submit a BLS partial signature
+- `combine-signatures`: Verify and combine signatures
+
+### Watchtower System
+- `register-watchtower`: Register as a monitoring node
+- `submit-watchtower-report`: Submit performance reports
 
 ### Governance
-- Dynamic signer rotation
-- Reputation-based selection
-- Automated penalties
-- Performance thresholds
-- Stake-weighted voting
+- `create-proposal`: Create a governance proposal
+- `vote-on-proposal`: Vote on an active proposal
+- `finalize-proposal`: Finalize and execute passed proposals
 
-## Getting Started
+### Cross-Chain Operations
+- `register-cross-chain`: Register external chain
+- `submit-cross-chain-tx`: Submit proof of external transaction
 
-### Prerequisites
-- Clarity CLI
-- Stacks blockchain environment
-- Node.js and NPM
+### Economic Functions
+- `claim-rewards`: Claim performance-based rewards
 
-### Installation
-```bash
-# Clone repository
-git clone https://github.com/yourusername/dts-network.git
-cd dts-network
+### Administration
+- `set-contract-owner`: Change contract ownership
+- `toggle-emergency-pause`: Pause/unpause in emergency
+- `trigger-rotation`: Manually trigger rotation
 
-# Install dependencies
-npm install
+### Query Functions
+- `get-signer-info`: Get details about a signer
+- `is-active-signer`: Check if a signer is active
+- `get-active-signer-count`: Get count of active signers
+- `get-signer-metrics`: Get performance metrics
+- `get-proposal`: Get proposal details
+- `get-vote`: Get vote details
+- `get-chain-info`: Get information about a registered chain
+- `get-metrics-history`: Get historical metrics by epoch
+- `get-protocol-stats`: Get current protocol statistics
 
-# Deploy contract
-clarinet contract deploy
-```
+## 📥 Installation
 
-### Contract Initialization
+To deploy this contract on the Stacks blockchain:
+
+1. Install the [Clarinet](https://github.com/hirosystems/clarinet) development environment:
+   ```bash
+   curl -sS https://get.clarinet.build | sh
+   ```
+
+2. Create a new project:
+   ```bash
+   clarinet new dtsn-project
+   cd dtsn-project
+   ```
+
+3. Replace the default contract with the DTSN contract:
+   ```bash
+   cp path/to/dtsn-contract.clar contracts/dtsn.clar
+   ```
+
+4. Test and deploy:
+   ```bash
+   clarinet test
+   clarinet deploy
+   ```
+
+## 🚀 Usage
+
+### Becoming a Signer
+
+To join the network as a signer:
+
+1. Ensure you have sufficient STX tokens to meet the minimum stake
+2. Generate a BLS key pair
+3. Call the `register-signer` function with your public key
+
 ```clarity
-;; Initialize with default parameters
-(contract-call? .dts initialize
-    u100000  ;; minimum stake
-    u3       ;; required signers
-    u5       ;; total signers
-    u144     ;; rotation period
-    u3       ;; signature threshold
-)
+(contract-call? .dtsn register-signer 0x[your-public-key])
 ```
 
-## Usage Guide
+### Submitting a Partial Signature
 
-### Register as Signer
+To participate in signature generation:
+
+1. Hash the message to be signed
+2. Generate your partial BLS signature
+3. Submit it to the network
+
 ```clarity
-;; Register new signer
-(contract-call? .dts register-signer <public-key>)
+(contract-call? .dtsn submit-partial-signature 0x[message-hash] 0x[your-signature])
 ```
 
-### Submit Signature
+### Creating a Governance Proposal
+
+To propose a parameter change:
+
 ```clarity
-;; Submit partial signature
-(contract-call? .dts submit-partial-signature
-    <message-hash>
-    <signature>
-)
+(contract-call? .dtsn create-proposal 
+    "Increase Min Stake" 
+    "Increase minimum stake to 150,000 STX to enhance security" 
+    u1 
+    (some "min-stake") 
+    (some u150000) 
+    none 
+    u1440)
 ```
 
-### Monitor Network
+### Voting on a Proposal
+
+To vote on an active proposal:
+
 ```clarity
-;; Register as watchtower
-(contract-call? .dts register-watchtower)
-
-;; Submit monitoring report
-(contract-call? .dts submit-watchtower-report
-    <signer>
-    <uptime>
-    <signing-speed>
-    <valid-signatures>
-)
+(contract-call? .dtsn vote-on-proposal u1 true) ;; true for yes, false for no
 ```
 
-## Error Handling
+## 🏛️ Governance
 
-### Error Codes
+The governance system allows token holders to propose and vote on changes to the protocol. This includes parameter modifications, feature activations, and signer removals.
+
+### Proposal Types
+
+1. **Parameter Change (type 1)**: Modify protocol parameters
+2. **Feature Activation (type 2)**: Enable/disable protocol features
+3. **Signer Removal (type 3)**: Remove a misbehaving signer
+4. **Custom Actions (types 4+)**: Extensible for future needs
+
+### Voting Process
+
+1. **Proposal Creation**: Any signer with sufficient reputation can create a proposal
+2. **Voting Period**: Minimum duration defined by `min-proposal-duration`
+3. **Vote Weight**: Based on stake and reputation score
+4. **Approval Threshold**: Defined by `governance-threshold` (default 67%)
+5. **Execution**: Automatically executed after approval and execution delay
+
+## 🔗 Cross-Chain Integration
+
+The cross-chain verification system allows the DTSN to verify and record transactions from external blockchains.
+
+### Supported Operations
+
+1. **Chain Registration**: Register external chains for verification
+2. **Transaction Verification**: Verify external transactions with oracle signatures
+3. **Proof Validation**: Validate proofs with threshold consensus
+
+### Integration Process
+
+1. Register an external chain with oracle public key and verification threshold
+2. Oracles submit transaction proofs from the external chain
+3. Once verification threshold is reached, the transaction is recorded
+4. Events are emitted for subscribers
+
+## 🔒 Security
+
+The DTSN includes several security mechanisms:
+
+### Emergency Pause
+
+The contract owner can pause operations in case of emergency, preventing any state-changing operations until the pause is lifted.
+
+### Reputation System
+
+Signers have a reputation score (1-100) that:
+- Affects voting power in governance
+- Influences reward distribution
+- Is required for certain operations
+- Decreases on slashing events
+
+### Slashing Mechanism
+
+Malicious or poorly performing signers can be slashed, which:
+- Reduces their reputation score
+- Records the slashing event
+- May remove them from active signer set after multiple offenses
+
+### Performance Metrics
+
+The system tracks several performance metrics:
+- Signing speed
+- Uptime
+- Accuracy
+- Total signatures
+- Valid signatures ratio
+
+## 📢 Events System
+
+The events system allows external applications to subscribe to and receive notifications about protocol activities.
+
+### Event Types
+
+1. `EVENT-TYPE-SIGNER-REGISTERED`: New signer registration
+2. `EVENT-TYPE-SIGNATURE-SUBMITTED`: Partial signature submission
+3. `EVENT-TYPE-THRESHOLD-REACHED`: Signature threshold reached
+4. `EVENT-TYPE-GOVERNANCE-PROPOSAL`: New governance proposal
+5. `EVENT-TYPE-GOVERNANCE-VOTE`: Vote on proposal
+6. `EVENT-TYPE-SIGNER-SLASHED`: Signer slashing event
+7. `EVENT-TYPE-ROTATION-EXECUTED`: Signer rotation event
+8. `EVENT-TYPE-CROSS-CHAIN-VERIFIED`: Cross-chain verification
+9. `EVENT-TYPE-EMERGENCY-ACTION`: Emergency actions
+10. `EVENT-TYPE-REWARD-DISTRIBUTED`: Reward distribution
+
+### Subscription
+
+To subscribe to specific events:
+
 ```clarity
-ERR-UNAUTHORIZED (err u100)
-ERR-INVALID-PARAMS (err u101)
-ERR-INSUFFICIENT-STAKE (err u102)
-ERR-INVALID-SIGNATURE (err u103)
-ERR-INVALID-THRESHOLD (err u104)
-ERR-WATCHTOWER-EXISTS (err u105)
-ERR-NOT-ACTIVE-SIGNER (err u106)
-ERR-ALREADY-REGISTERED (err u107)
-ERR-INVALID-METRICS (err u108)
-ERR-INVALID-SIGNATURE-LENGTH (err u109)
-ERR-INVALID-KEY-LENGTH (err u110)
-ERR-ALREADY-INITIALIZED (err u111)
+(contract-call? .dtsn subscribe-to-events (list u1 u2 u3))
 ```
 
-## Development Roadmap
+## 🛣️ Development Roadmap
 
-### Phase 1 (Completed)
-- Basic contract structure
-- Core data structures
-- Initial security measures
+### Phase 4 (Upcoming)
+- Layer-2 scalability solution for high-throughput signature generation
+- Enhanced privacy features with zero-knowledge proofs
+- Multi-signature wallet integration
+- Decentralized identity attestations
+- Integration with Stacks 2.1 features
 
-### Phase 2 (Current)
-- Enhanced signature validation
-- Improved type safety
-- Robust error handling
-- Initialization protection
-- Map structure improvements
+### Future Enhancements
+- Advanced MEV (Maximal Extractable Value) protection
+- Cross-chain bridge functionality
+- Automated security auditing
+- Dynamic threshold adjustment
+- Machine learning-based performance prediction
 
-### Phase 3 (Planned)
-- Advanced governance features
-- Performance optimization
-- Enhanced security measures
-- Cross-chain integration
-- Event system implementation
+## 👥 Contributing
 
-## Testing
-
-### Unit Tests
-```bash
-# Run test suite
-clarinet test
-
-# Run specific test
-clarinet test tests/dts_test.ts
-```
-
-### Security Considerations
-- Regular security audits
-- Formal verification
-- Penetration testing
-- Stress testing
-- Performance benchmarking
-
-## Contributing
-Please follow these steps:
+Contributions are welcome! Please feel free to submit a Pull Request.
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## License
-This project is licensed under the MIT License.
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+---
+
+## Contact
+
+For questions or support, please open an issue in the GitHub repository.
