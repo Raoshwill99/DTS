@@ -1,223 +1,222 @@
-# Distributed Threshold Signing Network (DTS)
+# Compact Distributed Threshold Signing Network
+
+A streamlined threshold signature scheme implemented on the Stacks blockchain. This system enables distributed key management and signature generation with essential functionality and minimal complexity.
 
 ## Overview
-DTS is a secure and decentralized threshold signing network implemented on the Stacks blockchain using Clarity smart contracts. The system enables distributed signing operations using a t-of-n threshold signature scheme with dynamic signer rotation, robust reputation-based governance, and comprehensive security measures.
 
-## Technical Architecture
+The Compact Distributed Threshold Signing Network (CDTSN) is a simplified infrastructure for distributed key management and threshold signatures. It uses threshold cryptography to allow a subset of signers to collectively produce cryptographic signatures while maintaining security and fault tolerance.
 
-### Core Components
+### What are Threshold Signatures?
 
-1. **Signature Management**
-   - BLS threshold signature scheme (t-of-n)
-   - Partial signature submission and verification
-   - Signature aggregation mechanism
-   - Configurable threshold parameters
+Threshold signatures allow a group of participants to collectively generate a single cryptographic signature. With an (n,t) threshold scheme, any t participants out of n total can collaborate to create a valid signature, while fewer than t cannot. This provides both security and fault tolerance.
 
-2. **Node Types**
-   - Primary Signers: Active validators with stake
-   - Backup Signers: Ready for rotation
-   - Watchtowers: Network monitors
+### Key Benefits
 
-3. **Security Features**
-   - Stake-based participation
-   - Slashing conditions
-   - Multi-signature verification
-   - Initialization protection
-   - Emergency controls
+- Decentralized Key Management: No single entity has complete control of cryptographic keys
+- Fault Tolerance: System continues operating even if some signers are offline
+- Compact Signatures: Produces single signatures regardless of the number of signers
+- Simple Governance: Basic parameter management by contract owner
+- Performance: Streamlined implementation with minimal overhead
 
-### Data Structures
+## Architecture
 
-```clarity
-;; Signer Node
-{
-    stake: uint,
-    public-key: (buff 65),
-    reputation-score: uint,
-    last-active: uint,
-    performance-metrics: {
-        signing-speed: uint,
-        uptime: uint,
-        stake-duration: uint,
-        accuracy: uint,
-        total-signatures: uint,
-        valid-signatures: uint
-    },
-    slashing-history: {
-        total-slashes: uint,
-        last-slash-height: uint,
-        slashed-amount: uint
-    }
-}
+The CDTSN consists of the following core components:
 
-;; Watchtower
-{
-    last-report: uint,
-    reports-submitted: uint,
-    accuracy-score: uint,
-    is-active: bool
-}
-
-;; Partial Signature
-{
-    signature: (buff 96),
-    message-hash: (buff 32),
-    timestamp: uint
-}
-```
+1. **Signer Network**: Nodes that stake tokens and participate in signature generation
+2. **Threshold Management**: Configurable signature threshold requirements
+3. **Access Control**: Owner-based administration and parameter management
+4. **State Management**: Essential data structures for signer and signature tracking
 
 ## Features
 
-### Security Measures
+### Core Features
+- Threshold signature generation and verification
+- Stake-based signer registration and management
+- Configurable signature threshold
+- Basic signer rotation capabilities
+
+### Security Features
 - Minimum stake requirements
-- Performance-based rotation
-- Slashing for misbehavior
-- Watchtower monitoring
-- One-time initialization
-- Length validation for cryptographic inputs
+- Active signer validation
+- Owner-based access control
+- Signature validation mechanisms
 
-### Performance Metrics
-- Signing speed
-- Node uptime
-- Stake duration
-- Signature accuracy
-- Total participation
-- Historical performance
+### Administrative Features
+- Contract owner management
+- Threshold parameter updates
+- Signer removal capabilities
+- System status queries
 
-### Governance
-- Dynamic signer rotation
-- Reputation-based selection
-- Automated penalties
-- Performance thresholds
-- Stake-weighted voting
+## Technical Implementation
 
-## Getting Started
+The CDTSN is implemented as a Clarity smart contract on the Stacks blockchain with simplified data structures and streamlined logic.
 
-### Prerequisites
-- Clarity CLI
-- Stacks blockchain environment
-- Node.js and NPM
+### Key Data Structures
 
-### Installation
-```bash
-# Clone repository
-git clone https://github.com/yourusername/dts-network.git
-cd dts-network
+- **Signer Management**:
+  - `signer-nodes`: Tracks registered signers with stake, public key, and status
+  - `active-signers`: Identifies current active signers
+  - `partial-signatures`: Stores submitted signatures with timestamps
 
-# Install dependencies
-npm install
+### System Parameters
 
-# Deploy contract
-clarinet contract deploy
-```
+The protocol includes essential configurable parameters:
+- `min-stake`: Minimum tokens required to become a signer
+- `signature-threshold`: Minimum signatures required for verification
+- `contract-owner`: Principal with administrative privileges
 
-### Contract Initialization
+## Functions
+
+### Initialization
+- `initialize`: Set up threshold and minimum stake parameters
+
+### Signer Management
+- `register-signer`: Join the network as a signer with stake requirement
+- `remove-signer`: Leave the active signer set
+- `get-signer-info`: Query signer details and status
+
+### Signature Operations
+- `submit-signature`: Submit a partial signature for threshold verification
+- `validate-threshold`: Check if sufficient valid signatures have been collected
+
+### Administrative Functions
+- `update-threshold`: Modify signature threshold (owner only)
+- `set-owner`: Transfer contract ownership
+- `get-contract-stats`: Query system statistics
+
+### Query Functions
+- `get-threshold-status`: Get current threshold and signature counts
+- `get-contract-stats`: Get system overview including owner and parameters
+
+## Installation
+
+To deploy this contract on the Stacks blockchain:
+
+1. Install the Clarinet development environment:
+   ```bash
+   curl -sS https://get.clarinet.build | sh
+   ```
+
+2. Create a new project:
+   ```bash
+   clarinet new cdtsn-project
+   cd cdtsn-project
+   ```
+
+3. Replace the default contract with the CDTSN contract:
+   ```bash
+   cp path/to/cdtsn-contract.clar contracts/cdtsn.clar
+   ```
+
+4. Test and deploy:
+   ```bash
+   clarinet test
+   clarinet deploy
+   ```
+
+## Usage
+
+### Becoming a Signer
+
+To join the network as a signer:
+
+1. Ensure you have sufficient STX tokens to meet the minimum stake
+2. Generate a public key for signature operations
+3. Call the register-signer function
+
 ```clarity
-;; Initialize with default parameters
-(contract-call? .dts initialize
-    u100000  ;; minimum stake
-    u3       ;; required signers
-    u5       ;; total signers
-    u144     ;; rotation period
-    u3       ;; signature threshold
-)
+(contract-call? .cdtsn register-signer 0x[your-public-key])
 ```
 
-## Usage Guide
+### Submitting a Signature
 
-### Register as Signer
+To participate in signature generation:
+
+1. Generate your partial signature for the current message
+2. Submit it to the network
+
 ```clarity
-;; Register new signer
-(contract-call? .dts register-signer <public-key>)
+(contract-call? .cdtsn submit-signature 0x[your-signature] 0x[message-hash])
 ```
 
-### Submit Signature
+### Administrative Operations
+
+Contract owner can update parameters:
+
 ```clarity
-;; Submit partial signature
-(contract-call? .dts submit-partial-signature
-    <message-hash>
-    <signature>
-)
+(contract-call? .cdtsn update-threshold u5) ;; Set new threshold
+(contract-call? .cdtsn set-owner 'SP1ABC...) ;; Transfer ownership
 ```
 
-### Monitor Network
-```clarity
-;; Register as watchtower
-(contract-call? .dts register-watchtower)
+## Security
 
-;; Submit monitoring report
-(contract-call? .dts submit-watchtower-report
-    <signer>
-    <uptime>
-    <signing-speed>
-    <valid-signatures>
-)
-```
+The CDTSN includes essential security mechanisms:
+
+### Stake Requirements
+
+All signers must maintain a minimum stake to participate in the network, ensuring economic incentive alignment.
+
+### Access Control
+
+Administrative functions are restricted to the contract owner, preventing unauthorized parameter changes.
+
+### Signature Validation
+
+The system validates that signatures come from active signers and match the current message hash before counting them toward the threshold.
+
+### Active Signer Management
+
+Only registered and active signers can submit signatures, with mechanisms to remove inactive or malicious participants.
 
 ## Error Handling
 
-### Error Codes
-```clarity
-ERR-UNAUTHORIZED (err u100)
-ERR-INVALID-PARAMS (err u101)
-ERR-INSUFFICIENT-STAKE (err u102)
-ERR-INVALID-SIGNATURE (err u103)
-ERR-INVALID-THRESHOLD (err u104)
-ERR-WATCHTOWER-EXISTS (err u105)
-ERR-NOT-ACTIVE-SIGNER (err u106)
-ERR-ALREADY-REGISTERED (err u107)
-ERR-INVALID-METRICS (err u108)
-ERR-INVALID-SIGNATURE-LENGTH (err u109)
-ERR-INVALID-KEY-LENGTH (err u110)
-ERR-ALREADY-INITIALIZED (err u111)
-```
+The contract defines clear error codes for different failure scenarios:
 
-## Development Roadmap
+- `ERR-UNAUTHORIZED`: Caller lacks required permissions
+- `ERR-INVALID-PARAMS`: Invalid function parameters
+- `ERR-INSUFFICIENT-STAKE`: Stake below minimum requirement
+- `ERR-NOT-ACTIVE-SIGNER`: Caller not an active signer
+- `ERR-ALREADY-EXISTS`: Signer already registered
+- `ERR-THRESHOLD-NOT-REACHED`: Insufficient valid signatures
 
-### Phase 1 (Completed)
-- Basic contract structure
-- Core data structures
-- Initial security measures
+## Development
 
-### Phase 2 (Current)
-- Enhanced signature validation
-- Improved type safety
-- Robust error handling
-- Initialization protection
-- Map structure improvements
+### Testing
 
-### Phase 3 (Planned)
-- Advanced governance features
-- Performance optimization
-- Enhanced security measures
-- Cross-chain integration
-- Event system implementation
+The contract includes comprehensive validation logic that can be tested using Clarinet:
 
-## Testing
-
-### Unit Tests
 ```bash
-# Run test suite
 clarinet test
-
-# Run specific test
-clarinet test tests/dts_test.ts
 ```
 
-### Security Considerations
-- Regular security audits
-- Formal verification
-- Penetration testing
-- Stress testing
-- Performance benchmarking
+### Deployment
+
+Deploy to testnet for testing:
+
+```bash
+clarinet deploy --testnet
+```
+
+Deploy to mainnet:
+
+```bash
+clarinet deploy --mainnet
+```
 
 ## Contributing
-Please follow these steps:
+
+Contributions are welcome! Please follow these steps:
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
+2. Create your feature branch
+3. Commit your changes with clear descriptions
 4. Push to the branch
-5. Create a Pull Request
+5. Open a Pull Request
 
 ## License
-This project is licensed under the MIT License.
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contact
+
+For questions or support, please open an issue in the GitHub repository.
